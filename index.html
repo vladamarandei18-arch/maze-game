@@ -327,8 +327,7 @@
       if (lavaCount >= maxLava) break;
       if (grid[tile.y][tile.x] !== FLOOR) continue;
       if (Math.hypot(tile.x - 1, tile.y - 1) < 3) continue;
-Use code with caution.
-if (Math.hypot(tile.x - exitPos.x, tile.y - exitPos.y) < 2) continue;
+      if (Math.hypot(tile.x - exitPos.x, tile.y - exitPos.y) < 2) continue;
 grid[tile.y][tile.x] = LAVA;
 const { dist } = bfsDistances(1, 1, true, false);
 if (dist[exitPos.y][exitPos.x] === Infinity) {
@@ -393,7 +392,7 @@ if (!type) return;
 // Weapons are destroyed if dropped onto lava
 if (grid[y][x] === LAVA) {
 addEffect(x, y, '🔥 BURNED!', '#f97316');
-setStatus(The ${type} fell into lava and burned up!, '#f97316');
+setStatus(`The ${type} fell into lava and burned up!`, '#f97316');
 return;
 }
 items.push({
@@ -415,11 +414,11 @@ const oldWeapon = player.weapon;
 player.weapon = it.type;
 if (oldWeapon) {
 spawnDroppedWeapon(oldWeapon, player.x, player.y);
-setStatus(Swapped ${oldWeapon} for ${it.type}!, '#38bdf8');
+setStatus(`Swapped ${oldWeapon} for ${it.type}!`, '#38bdf8');
 } else {
-setStatus(Picked up the ${it.type.toUpperCase()}!, '#38bdf8');
+setStatus(`Picked up the ${it.type.toUpperCase()}!`, '#38bdf8');
 }
-addEffect(player.x, player.y, +${it.type.toUpperCase()}, '#38bdf8');
+addEffect(player.x, player.y, `+${it.type.toUpperCase()}`, '#38bdf8');
 updateHUD();
 break;
 }
@@ -431,7 +430,7 @@ const dropped = player.weapon;
 player.weapon = null;
 spawnDroppedWeapon(dropped, player.x, player.y);
 if (grid[player.y][player.x] !== LAVA) {
-setStatus(Dropped ${dropped} on your tile., '#fbbf24');
+setStatus(`Dropped ${dropped} on your tile.`, '#fbbf24');
 }
 updateHUD();
 }
@@ -443,11 +442,11 @@ addEffect(player.x, player.y, '-1 ❤️', '#ef4444');
 updateHUD();
 if (player.lives <= 0) {
 gameOver = true;
-setStatus(Game Over (${reason})! Press "New Maze" to play again., '#ef4444');
+setStatus(`Game Over (${reason})! Press "New Maze" to play again.`, '#ef4444');
 } else {
 player.x = spawnPoint.x;
 player.y = spawnPoint.y;
-setStatus(${reason}! Respawned at checkpoint (${player.lives} lives left)., '#f87171');
+setStatus(`${reason}! Respawned at checkpoint (${player.lives} lives left).`, '#f87171');
 }
 }
 function movePlayer(dx, dy) {
@@ -479,7 +478,7 @@ return;
 }
 if (tile === EXIT) {
 level++;
-setStatus(Level ${level - 1} cleared! Starting Level ${level}..., '#4ade80');
+setStatus(`Level ${level - 1} cleared! Starting Level ${level}...`, '#4ade80');
 generateMaze();
 return;
 }
@@ -501,8 +500,8 @@ spawnDroppedWeapon(enemy.weapon, enemy.x, enemy.y);
 }
 updateHUD();
 } else {
-addEffect(enemy.x, enemy.y, ${enemy.hp} HP LEFT!, '#fbbf24');
-setStatus(Hit armored Sword Enemy! (${enemy.hp} HP remaining), '#fbbf24');
+addEffect(enemy.x, enemy.y, `${enemy.hp} HP LEFT!`, '#fbbf24');
+setStatus(`Hit armored Sword Enemy! (${enemy.hp} HP remaining)`, '#fbbf24');
 }
 }
 function playerAttack() {
@@ -730,7 +729,7 @@ ctx.fillText(e.weapon === 'sword' ? '⚔️' : '🔫', cx + 8, cy - 8);
 if (e.maxHp > 1) {
 ctx.fillStyle = '#fde047';
 ctx.font = 'bold 10px sans-serif';
-ctx.fillText(${e.hp}HP, cx, cy + 12);
+ctx.fillText(`${e.hp}HP`, cx, cy + 12);
 }
 }
 // 4. Draw Player
