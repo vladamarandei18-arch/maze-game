@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,20 +8,21 @@
   * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
   body {
     margin: 0;
-    background: #111622;
+    background: radial-gradient(circle at top, #182236 0%, #0b0f19 100%);
     color: #f1f5f9;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    padding: 12px;
+    padding: 14px;
   }
   h1 {
-    margin: 4px 0 8px;
-    font-size: 1.35rem;
-    letter-spacing: 0.5px;
+    margin: 2px 0 10px;
+    font-size: 1.45rem;
+    letter-spacing: 1px;
     color: #38bdf8;
+    text-shadow: 0 2px 10px rgba(56, 189, 248, 0.35);
   }
   #hud {
     display: flex;
@@ -30,26 +30,27 @@
     gap: 10px;
     justify-content: center;
     align-items: center;
-    background: #1e293b;
+    background: rgba(30, 41, 59, 0.85);
     padding: 8px 14px;
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid #334155;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-size: 0.92rem;
-    max-width: 680px;
+    max-width: 660px;
     width: 100%;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
   }
   .badge {
     background: #0f172a;
-    padding: 4px 10px;
-    border-radius: 6px;
+    padding: 5px 11px;
+    border-radius: 8px;
     border: 1px solid #334155;
     font-weight: 600;
   }
   #status-msg {
     color: #fbbf24;
     font-weight: 600;
-    min-height: 20px;
+    min-height: 22px;
     margin-bottom: 8px;
     text-align: center;
     font-size: 0.95rem;
@@ -57,10 +58,10 @@
   #canvas-wrap {
     position: relative;
     border: 3px solid #334155;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     background: #0f172a;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.6);
   }
   canvas {
     display: block;
@@ -71,10 +72,10 @@
     margin-top: 12px;
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 18px;
     justify-content: center;
     align-items: center;
-    max-width: 680px;
+    max-width: 660px;
     width: 100%;
   }
   .dpad {
@@ -107,9 +108,9 @@
     gap: 8px;
   }
   .action-btn {
-    padding: 12px 18px;
-    font-size: 0.98rem;
-    min-width: 145px;
+    padding: 11px 18px;
+    font-size: 0.96rem;
+    min-width: 155px;
   }
   .btn-attack { background: #dc2626; border-color: #f87171; }
   .btn-attack:active { background: #b91c1c; }
@@ -122,7 +123,7 @@
     font-size: 0.8rem;
     color: #94a3b8;
     text-align: center;
-    max-width: 660px;
+    max-width: 640px;
     line-height: 1.45;
   }
 </style>
@@ -132,10 +133,10 @@
   <h1>MAZE ARENA</h1>
 
   <div id="hud">
-    <div class="badge">❤️ Lives: <span id="ui-lives">3</span></div>
-    <div class="badge">🎒 Weapon: <span id="ui-weapon">None</span></div>
-    <div class="badge">👾 Enemies: <span id="ui-enemies">0</span></div>
-    <div class="badge">🚩 Level: <span id="ui-level">1</span></div>
+    <div class="badge">Lives: <span id="ui-lives">3</span></div>
+    <div class="badge">Weapon: <span id="ui-weapon">None</span></div>
+    <div class="badge">Enemies: <span id="ui-enemies">0</span></div>
+    <div class="badge">Level: <span id="ui-level">1</span></div>
   </div>
 
   <div id="status-msg">Find the Sword or Gun and reach the Green Exit!</div>
@@ -155,14 +156,14 @@
     </div>
 
     <div class="actions">
-      <button class="btn action-btn btn-attack" id="btn-attack">⚔️ / 🔫 Attack (Space)</button>
-      <button class="btn action-btn btn-drop" id="btn-drop">🫳 Drop Weapon (Q)</button>
-      <button class="btn action-btn btn-new" id="btn-new">🔄 New Maze</button>
+      <button class="btn action-btn btn-attack" id="btn-attack">Attack / Shoot (Space)</button>
+      <button class="btn action-btn btn-drop" id="btn-drop">Drop Weapon (Q)</button>
+      <button class="btn action-btn btn-new" id="btn-new">New Maze</button>
     </div>
   </div>
 
   <div class="legend">
-    <strong>Controls:</strong> Move with <b>WASD / Arrows</b> | Attack/Shoot with <b>Space / F / Enter / Click</b> | Drop with <b>Q</b>.<br>
+    <strong>Controls:</strong> Move with <b>WASD / Arrows</b> | Attack or Shoot with <b>Space / F / Enter / Click</b> | Drop Weapon with <b>Q</b>.<br>
     <strong>Rules:</strong> Carry 1 weapon at a time. Swapping drops your old weapon on your tile. Enemies search for weapons, avoid lava, and cannot enter blue Checkpoints. Sword enemies have <b>2 HP</b>. Weapons burn if dropped in lava!
   </div>
 
@@ -175,24 +176,38 @@
   const ROWS = 19;
   const TILE = canvas.width / COLS;
 
-  // Tile Types
   const WALL = 1;
   const FLOOR = 0;
   const LAVA = 2;
   const CHECKPOINT = 3;
   const EXIT = 4;
 
+  const STEP_DIRS = [
+    { dx: 1, dy: 0 },
+    { dx: -1, dy: 0 },
+    { dx: 0, dy: 1 },
+    { dx: 0, dy: -1 }
+  ];
+
+  const CARVE_DIRS = [
+    { dx: 2, dy: 0 },
+    { dx: -2, dy: 0 },
+    { dx: 0, dy: 2 },
+    { dx: 0, dy: -2 }
+  ];
+
   let grid = [];
   let level = 1;
   let player = {};
   let spawnPoint = { x: 1, y: 1 };
-  let items = [];       // { id, type: 'sword'|'gun', x, y, cooldown }
-  let enemies = [];     // { id, x, y, hp, maxHp, weapon: null|'sword'|'gun', dir, shootCd }
-  let bullets = [];     // { x, y, dx, dy, owner: 'player'|'enemy' }
-  let effects = [];     // { x, y, text, color, timer }
+  let items = [];
+  let enemies = [];
+  let bullets = [];
+  let effects = [];
   let gameOver = false;
   let lastEnemyMove = 0;
   let lastBulletMove = 0;
+  let animTick = 0;
 
   const uiLives = document.getElementById('ui-lives');
   const uiWeapon = document.getElementById('ui-weapon');
@@ -205,19 +220,17 @@
     statusMsg.style.color = color;
   }
 
-  // BFS helper to find shortest path & distances
   function bfsDistances(startX, startY, blockLava = false, blockCheckpoints = false) {
     const dist = Array.from({ length: ROWS }, () => Array(COLS).fill(Infinity));
     const parent = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
     const q = [{ x: startX, y: startY }];
     dist[startY][startX] = 0;
 
-    const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
     while (q.length > 0) {
       const cur = q.shift();
-      for (const [dx, dy] of dirs) {
-        const nx = cur.x + dx;
-        const ny = cur.y + dy;
+      for (const d of STEP_DIRS) {
+        const nx = cur.x + d.dx;
+        const ny = cur.y + d.dy;
         if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
         const t = grid[ny][nx];
         if (t === WALL) continue;
@@ -235,7 +248,7 @@
 
   function getNextStepToward(fromX, fromY, targetX, targetY) {
     const { dist, parent } = bfsDistances(fromX, fromY, true, true);
-    if (dist[targetY]?.[targetX] === undefined || dist[targetY][targetX] === Infinity) {
+    if (!dist[targetY] || dist[targetY][targetX] === Infinity) {
       return null;
     }
     let cur = { x: targetX, y: targetY };
@@ -252,36 +265,32 @@
     items = [];
     enemies = [];
 
-    // 1. Initialize solid walls
     grid = Array.from({ length: ROWS }, () => Array(COLS).fill(WALL));
 
-    // 2. Recursive backtracker on odd coordinates
     function carve(x, y) {
       grid[y][x] = FLOOR;
-      const dirs = [[2,0],[-2,0],[0,2],[0,-2]].sort(() => Math.random() - 0.5);
-      for (const [dx, dy] of dirs) {
-        const nx = x + dx;
-        const ny = y + dy;
+      const shuffled = [...CARVE_DIRS].sort(() => Math.random() - 0.5);
+      for (const d of shuffled) {
+        const nx = x + d.dx;
+        const ny = y + d.dy;
         if (nx > 0 && ny > 0 && nx < COLS - 1 && ny < ROWS - 1 && grid[ny][nx] === WALL) {
-          grid[y + dy / 2][x + dx / 2] = FLOOR;
+          grid[y + d.dy / 2][x + d.dx / 2] = FLOOR;
           carve(nx, ny);
         }
       }
     }
     carve(1, 1);
 
-    // 3. Braid dead-ends & open extra loops so corridors are spacious and never impossible
     for (let y = 2; y < ROWS - 2; y++) {
       for (let x = 2; x < COLS - 2; x++) {
-        if (grid[y][x] === WALL && Math.random() < 0.24) {
-          const openH = grid[y][x-1] === FLOOR && grid[y][x+1] === FLOOR;
-          const openV = grid[y-1][x] === FLOOR && grid[y+1][x] === FLOOR;
+        if (grid[y][x] === WALL && Math.random() < 0.25) {
+          const openH = grid[y][x - 1] === FLOOR && grid[y][x + 1] === FLOOR;
+          const openV = grid[y - 1][x] === FLOOR && grid[y + 1][x] === FLOOR;
           if (openH || openV) grid[y][x] = FLOOR;
         }
       }
     }
 
-    // 4. Set Start & Exit
     spawnPoint = { x: 1, y: 1 };
     const exitPos = { x: COLS - 2, y: ROWS - 2 };
     grid[exitPos.y][exitPos.x] = EXIT;
@@ -289,6 +298,8 @@
     player = {
       x: spawnPoint.x,
       y: spawnPoint.y,
+      renderX: spawnPoint.x,
+      renderY: spawnPoint.y,
       dir: { x: 1, y: 0 },
       lives: 3,
       weapon: null,
@@ -296,7 +307,6 @@
       swingTimer: 0
     };
 
-    // Collect open floor tiles away from start & exit
     const openTiles = [];
     for (let y = 1; y < ROWS - 1; y++) {
       for (let x = 1; x < COLS - 1; x++) {
@@ -307,7 +317,6 @@
     }
     openTiles.sort(() => Math.random() - 0.5);
 
-    // 5. Place 2-3 well-spaced Checkpoints
     const checkpoints = [];
     for (const tile of openTiles) {
       if (checkpoints.length >= 3) break;
@@ -320,7 +329,6 @@
       }
     }
 
-    // 6. Place visible Lava tiles ONLY if a safe path from start to exit still exists
     let lavaCount = 0;
     const maxLava = Math.min(14, 7 + level);
     for (const tile of openTiles) {
@@ -328,496 +336,594 @@
       if (grid[tile.y][tile.x] !== FLOOR) continue;
       if (Math.hypot(tile.x - 1, tile.y - 1) < 3) continue;
       if (Math.hypot(tile.x - exitPos.x, tile.y - exitPos.y) < 2) continue;
-grid[tile.y][tile.x] = LAVA;
-const { dist } = bfsDistances(1, 1, true, false);
-if (dist[exitPos.y][exitPos.x] === Infinity) {
-grid[tile.y][tile.x] = FLOOR; // Revert so path is never blocked
-} else {
-lavaCount++;
-}
-}
-// 7. Spawn Sword near start & Gun further in on guaranteed safe floor tiles
-const { dist: safeDist } = bfsDistances(1, 1, true, false);
-const reachableFloors = [];
-for (let y = 1; y < ROWS - 1; y++) {
-for (let x = 1; x < COLS - 1; x++) {
-if (grid[y][x] === FLOOR && safeDist[y][x] < Infinity && !(x === 1 && y === 1)) {
-reachableFloors.push({ x, y, d: safeDist[y][x] });
-}
-}
-}
-reachableFloors.sort((a, b) => a.d - b.d);
-const swordSpot = reachableFloors.find(t => t.d >= 2 && t.d <= 6) || reachableFloors[0];
-if (swordSpot) {
-items.push({ id: 1, type: 'sword', x: swordSpot.x, y: swordSpot.y, cooldown: 0 });
-}
-const gunCandidates = reachableFloors.filter(
-t => t.d >= 7 && (!swordSpot || (t.x !== swordSpot.x || t.y !== swordSpot.y))
-);
-const gunSpot = gunCandidates[Math.floor(gunCandidates.length / 2)] || reachableFloors[reachableFloors.length - 1];
-if (gunSpot) {
-items.push({ id: 2, type: 'gun', x: gunSpot.x, y: gunSpot.y, cooldown: 0 });
-}
-// 8. Spawn Enemies away from player start and safe checkpoints
-const enemyCount = Math.min(5, 2 + Math.floor(level / 2));
-const enemySpots = reachableFloors
-.filter(t => t.d >= 6 && (!swordSpot || t.x !== swordSpot.x || t.y !== swordSpot.y))
-.sort(() => Math.random() - 0.5);
-for (let i = 0; i < Math.min(enemyCount, enemySpots.length); i++) {
-enemies.push({
-id: i + 1,
-x: enemySpots[i].x,
-y: enemySpots[i].y,
-hp: 1,
-maxHp: 1,
-weapon: null,
-dir: { x: -1, y: 0 },
-shootCd: 0
-});
-}
-updateHUD();
-setStatus('Find the Sword or Gun and reach the Green Exit!');
-}
-function addEffect(x, y, text, color = '#fbbf24') {
-effects.push({ x, y, text, color, timer: 28 });
-}
-function updateHUD() {
-uiLives.textContent = player.lives;
-uiWeapon.textContent = player.weapon === 'sword' ? '⚔️ Sword' : player.weapon === 'gun' ? '🔫 Gun' : 'None';
-uiEnemies.textContent = enemies.length;
-uiLevel.textContent = level;
-}
-function spawnDroppedWeapon(type, x, y) {
-if (!type) return;
-// Weapons are destroyed if dropped onto lava
-if (grid[y][x] === LAVA) {
-addEffect(x, y, '🔥 BURNED!', '#f97316');
-setStatus(`The ${type} fell into lava and burned up!`, '#f97316');
-return;
-}
-items.push({
-id: Date.now() + Math.random(),
-type,
-x,
-y,
-cooldown: 1 // Prevents instant auto-swap back until stepping off/re-triggering
-});
-}
-function tryPlayerPickup() {
-for (let i = 0; i < items.length; i++) {
-const it = items[i];
-if (it.x === player.x && it.y === player.y) {
-if (it.cooldown > 0) continue;
-// Atomically claim item first
-items.splice(i, 1);
-const oldWeapon = player.weapon;
-player.weapon = it.type;
-if (oldWeapon) {
-spawnDroppedWeapon(oldWeapon, player.x, player.y);
-setStatus(`Swapped ${oldWeapon} for ${it.type}!`, '#38bdf8');
-} else {
-setStatus(`Picked up the ${it.type.toUpperCase()}!`, '#38bdf8');
-}
-addEffect(player.x, player.y, `+${it.type.toUpperCase()}`, '#38bdf8');
-updateHUD();
-break;
-}
-}
-}
-function dropPlayerWeapon() {
-if (!player.weapon || gameOver) return;
-const dropped = player.weapon;
-player.weapon = null;
-spawnDroppedWeapon(dropped, player.x, player.y);
-if (grid[player.y][player.x] !== LAVA) {
-setStatus(`Dropped ${dropped} on your tile.`, '#fbbf24');
-}
-updateHUD();
-}
-function damagePlayer(reason) {
-if (player.invuln > 0 || gameOver) return;
-player.lives--;
-player.invuln = 25;
-addEffect(player.x, player.y, '-1 ❤️', '#ef4444');
-updateHUD();
-if (player.lives <= 0) {
-gameOver = true;
-setStatus(`Game Over (${reason})! Press "New Maze" to play again.`, '#ef4444');
-} else {
-player.x = spawnPoint.x;
-player.y = spawnPoint.y;
-setStatus(`${reason}! Respawned at checkpoint (${player.lives} lives left).`, '#f87171');
-}
-}
-function movePlayer(dx, dy) {
-if (gameOver) return;
-player.dir = { x: dx, y: dy };
-// Decrement cooldowns on items player stepped away from
-for (const it of items) {
-if (it.cooldown > 0 && (it.x !== player.x || it.y !== player.y)) {
-it.cooldown = 0;
-}
-}
-const nx = player.x + dx;
-const ny = player.y + dy;
-if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) return;
-const tile = grid[ny][nx];
-if (tile === WALL) return;
-player.x = nx;
-player.y = ny;
-if (tile === CHECKPOINT) {
-if (spawnPoint.x !== nx || spawnPoint.y !== ny) {
-spawnPoint = { x: nx, y: ny };
-addEffect(nx, ny, 'SAFE CHECKPOINT', '#38bdf8');
-setStatus('Checkpoint saved! Enemies cannot enter this tile.', '#38bdf8');
-}
-}
-if (tile === LAVA) {
-damagePlayer('Stepped in lava');
-return;
-}
-if (tile === EXIT) {
-level++;
-setStatus(`Level ${level - 1} cleared! Starting Level ${level}...`, '#4ade80');
-generateMaze();
-return;
-}
-tryPlayerPickup();
-// Check bump with enemy
-const hitEnemy = enemies.find(e => e.x === player.x && e.y === player.y);
-if (hitEnemy && tile !== CHECKPOINT) {
-damagePlayer('Hit by an enemy');
-}
-}
-function damageEnemy(enemy, amount = 1) {
-enemy.hp -= amount;
-if (enemy.hp <= 0) {
-const idx = enemies.indexOf(enemy);
-if (idx !== -1) enemies.splice(idx, 1);
-addEffect(enemy.x, enemy.y, 'DEFEATED!', '#4ade80');
-if (enemy.weapon) {
-spawnDroppedWeapon(enemy.weapon, enemy.x, enemy.y);
-}
-updateHUD();
-} else {
-addEffect(enemy.x, enemy.y, `${enemy.hp} HP LEFT!`, '#fbbf24');
-setStatus(`Hit armored Sword Enemy! (${enemy.hp} HP remaining)`, '#fbbf24');
-}
-}
-function playerAttack() {
-if (gameOver) return;
-if (!player.weapon) {
-setStatus('You have no weapon! Pick up the Sword or Gun first.', '#f87171');
-return;
-}
-if (player.weapon === 'sword') {
-player.swingTimer = 10;
-const tx = player.x + player.dir.x;
-const ty = player.y + player.dir.y;
-addEffect(tx, ty, '⚔️ SLASH', '#e2e8f0');
-// Hit enemy on front tile or adjacent front-diagonal / same tile
-const targets = enemies.filter(e =>
-(e.x === tx && e.y === ty) || (e.x === player.x && e.y === player.y)
-);
-if (targets.length > 0) {
-damageEnemy(targets[0], 1);
-}
-} else if (player.weapon === 'gun') {
-bullets.push({
-x: player.x,
-y: player.y,
-dx: player.dir.x,
-dy: player.dir.y,
-owner: 'player'
-});
-}
-}
-function stepBullets() {
-for (let i = bullets.length - 1; i >= 0; i--) {
-const b = bullets[i];
-b.x += b.dx;
-b.y += b.dy;
-if (b.x < 0 || b.y < 0 || b.x >= COLS || b.y >= ROWS || grid[b.y][b.x] === WALL) {
-bullets.splice(i, 1);
-continue;
-}
-if (b.owner === 'player') {
-const hit = enemies.find(e => e.x === b.x && e.y === b.y);
-if (hit) {
-bullets.splice(i, 1);
-damageEnemy(hit, 1);
-}
-} else if (b.owner === 'enemy') {
-// Checkpoints also shield player from enemy shots
-if (b.x === player.x && b.y === player.y && grid[player.y][player.x] !== CHECKPOINT) {
-bullets.splice(i, 1);
-damagePlayer('Shot by an armed enemy');
-}
-}
-}
-}
-function stepEnemies() {
-if (gameOver) return;
-for (let i = enemies.length - 1; i >= 0; i--) {
-const e = enemies[i];
-if (e.shootCd > 0) e.shootCd--;
-// Enemy with gun shoots if aligned with player (and player not on safe checkpoint)
-if (e.weapon === 'gun' && e.shootCd === 0 && grid[player.y][player.x] !== CHECKPOINT) {
-if (e.x === player.x || e.y === player.y) {
-const dx = Math.sign(player.x - e.x);
-const dy = Math.sign(player.y - e.y);
-// Check clear line of sight
-let cx = e.x + dx, cy = e.y + dy, clear = true;
-while (cx !== player.x || cy !== player.y) {
-if (grid[cy][cx] === WALL) { clear = false; break; }
-cx += dx; cy += dy;
-}
-if (clear) {
-e.dir = { x: dx, y: dy };
-e.shootCd = 4;
-bullets.push({ x: e.x, y: e.y, dx, dy, owner: 'enemy' });
-continue;
-}
-}
-}
-// Decide target: unarmed enemies search for weapons first; otherwise chase player
-let nextStep = null;
-if (!e.weapon && items.length > 0) {
-// Find closest reachable weapon (preferring gun, then sword)
-const sortedItems = [...items].sort((a, b) => {
-if (a.type !== b.type) return a.type === 'gun' ? -1 : 1;
-return Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y);
-});
-for (const it of sortedItems) {
-if (grid[it.y][it.x] === LAVA || grid[it.y][it.x] === CHECKPOINT) continue;
-const step = getNextStepToward(e.x, e.y, it.x, it.y);
-if (step) {
-nextStep = step;
-break;
-}
-}
-}
-// If no weapon target, chase player (unless player is standing on safe checkpoint)
-if (!nextStep && grid[player.y][player.x] !== CHECKPOINT) {
-nextStep = getNextStepToward(e.x, e.y, player.x, player.y);
-}
-// Fallback random safe move avoiding walls, lava, and checkpoints
-if (!nextStep) {
-const dirs = [[1,0],[-1,0],[0,1],[0,-1]].sort(() => Math.random() - 0.5);
-for (const [dx, dy] of dirs) {
-const nx = e.x + dx, ny = e.y + dy;
-if (nx <= 0 || ny <= 0 || nx >= COLS - 1 || ny >= ROWS - 1) continue;
-const t = grid[ny][nx];
-if (t === WALL || t === LAVA || t === CHECKPOINT) continue;
-if (enemies.some(other => other !== e && other.x === nx && other.y === ny)) continue;
-nextStep = { x: nx, y: ny };
-break;
-}
-}
-if (nextStep) {
-const t = grid[nextStep.y][nextStep.x];
-const occupied = enemies.some(other => other !== e && other.x === nextStep.x && other.y === nextStep.y);
-if (t !== WALL && t !== LAVA && t !== CHECKPOINT && !occupied) {
-e.dir = { x: nextStep.x - e.x, y: nextStep.y - e.y };
-e.x = nextStep.x;
-e.y = nextStep.y;
-}
-}
-// Atomic weapon pickup by unarmed enemy (only 1 enemy can claim an item)
-if (!e.weapon) {
-const itemIdx = items.findIndex(it => it.x === e.x && it.y === e.y);
-if (itemIdx !== -1) {
-const claimed = items.splice(itemIdx, 1)[0];
-e.weapon = claimed.type;
-if (claimed.type === 'sword') {
-e.hp = 2;
-e.maxHp = 2;
-addEffect(e.x, e.y, '⚔️ +2 HP!', '#f87171');
-setStatus('An enemy grabbed the Sword and gained 2 HP!', '#f87171');
-} else {
-addEffect(e.x, e.y, '🔫 ARMED!', '#f87171');
-setStatus('Watch out! An enemy grabbed the Gun!', '#f87171');
-}
-}
-}
-// Check enemy collision with player
-if (e.x === player.x && e.y === player.y && grid[player.y][player.x] !== CHECKPOINT) {
-damagePlayer(e.weapon === 'sword' ? 'Slashed by a Sword Enemy' : 'Caught by an enemy');
-}
-}
-}
-function draw() {
-ctx.clearRect(0, 0, canvas.width, canvas.height);
-// 1. Draw Tiles
-for (let y = 0; y < ROWS; y++) {
-for (let x = 0; x < COLS; x++) {
-const px = x * TILE;
-const py = y * TILE;
-const t = grid[y][x];
-if (t === WALL) {
-ctx.fillStyle = '#334155';
-ctx.fillRect(px, py, TILE, TILE);
-ctx.strokeStyle = '#1e293b';
-ctx.strokeRect(px, py, TILE, TILE);
-} else if (t === LAVA) {
-ctx.fillStyle = '#ea580c';
-ctx.fillRect(px, py, TILE, TILE);
-ctx.fillStyle = '#facc15';
-ctx.beginPath();
-ctx.arc(px + TILE * 0.35, py + TILE * 0.4, 3, 0, Math.PI * 2);
-ctx.arc(px + TILE * 0.7, py + TILE * 0.65, 2.5, 0, Math.PI * 2);
-ctx.fill();
-} else if (t === CHECKPOINT) {
-ctx.fillStyle = '#0369a1';
-ctx.fillRect(px, py, TILE, TILE);
-ctx.strokeStyle = '#38bdf8';
-ctx.lineWidth = 2;
-ctx.strokeRect(px + 2, py + 2, TILE - 4, TILE - 4);
-ctx.lineWidth = 1;
-ctx.fillStyle = '#e0f2fe';
-ctx.font = 'bold 14px sans-serif';
-ctx.textAlign = 'center';
-ctx.textBaseline = 'middle';
-ctx.fillText('🚩', px + TILE / 2, py + TILE / 2);
-} else if (t === EXIT) {
-ctx.fillStyle = '#16a34a';
-ctx.fillRect(px, py, TILE, TILE);
-ctx.fillStyle = '#ffffff';
-ctx.font = 'bold 11px sans-serif';
-ctx.textAlign = 'center';
-ctx.textBaseline = 'middle';
-ctx.fillText('EXIT', px + TILE / 2, py + TILE / 2);
-} else {
-ctx.fillStyle = '#0f172a';
-ctx.fillRect(px, py, TILE, TILE);
-ctx.strokeStyle = '#1e293b';
-ctx.strokeRect(px, py, TILE, TILE);
-}
-}
-}
-// 2. Draw Items (Sword & Gun)
-ctx.font = '18px sans-serif';
-ctx.textAlign = 'center';
-ctx.textBaseline = 'middle';
-for (const it of items) {
-const cx = it.x * TILE + TILE / 2;
-const cy = it.y * TILE + TILE / 2;
-ctx.fillStyle = it.type === 'sword' ? 'rgba(148, 163, 184, 0.25)' : 'rgba(250, 204, 21, 0.25)';
-ctx.beginPath();
-ctx.arc(cx, cy, TILE * 0.4, 0, Math.PI * 2);
-ctx.fill();
-ctx.fillText(it.type === 'sword' ? '⚔️' : '🔫', cx, cy);
-}
-// 3. Draw Enemies
-for (const e of enemies) {
-const cx = e.x * TILE + TILE / 2;
-const cy = e.y * TILE + TILE / 2;
-ctx.fillStyle = e.weapon === 'sword' ? '#9333ea' : e.weapon === 'gun' ? '#dc2626' : '#f43f5e';
-ctx.beginPath();
-ctx.arc(cx, cy, TILE * 0.36, 0, Math.PI * 2);
-ctx.fill();
-// Eyes
-ctx.fillStyle = '#fff';
-ctx.fillRect(cx - 5, cy - 4, 3, 3);
-ctx.fillRect(cx + 2, cy - 4, 3, 3);
-// Held weapon badge
-if (e.weapon) {
-ctx.font = '12px sans-serif';
-ctx.fillText(e.weapon === 'sword' ? '⚔️' : '🔫', cx + 8, cy - 8);
-}
-// HP indicator for 2-HP sword enemies
-if (e.maxHp > 1) {
-ctx.fillStyle = '#fde047';
-ctx.font = 'bold 10px sans-serif';
-ctx.fillText(`${e.hp}HP`, cx, cy + 12);
-}
-}
-// 4. Draw Player
-const pcx = player.x * TILE + TILE / 2;
-const pcy = player.y * TILE + TILE / 2;
-if (player.invuln === 0 || Math.floor(player.invuln / 3) % 2 === 0) {
-ctx.fillStyle = '#38bdf8';
-ctx.beginPath();
-ctx.arc(pcx, pcy, TILE * 0.36, 0, Math.PI * 2);
-ctx.fill();
-// Facing direction dot
-ctx.fillStyle = '#0f172a';
-ctx.beginPath();
-ctx.arc(pcx + player.dir.x * 6, pcy + player.dir.y * 6, 3, 0, Math.PI * 2);
-ctx.fill();
-if (player.weapon) {
-ctx.font = '13px sans-serif';
-ctx.fillText(player.weapon === 'sword' ? '⚔️' : '🔫', pcx + 9, pcy - 9);
-}
-}
-// Sword slash arc
-if (player.swingTimer > 0) {
-const sx = (player.x + player.dir.x) * TILE + TILE / 2;
-const sy = (player.y + player.dir.y) * TILE + TILE / 2;
-ctx.strokeStyle = '#f8fafc';
-ctx.lineWidth = 3;
-ctx.beginPath();
-ctx.arc(sx, sy, TILE * 0.35, 0, Math.PI * 2);
-ctx.stroke();
-ctx.lineWidth = 1;
-}
-// 5. Draw Bullets
-for (const b of bullets) {
-ctx.fillStyle = b.owner === 'player' ? '#facc15' : '#fb7185';
-ctx.beginPath();
-ctx.arc(b.x * TILE + TILE / 2, b.y * TILE + TILE / 2, 5, 0, Math.PI * 2);
-ctx.fill();
-}
-// 6. Draw Floating Effects
-for (let i = effects.length - 1; i >= 0; i--) {
-const ef = effects[i];
-ctx.fillStyle = ef.color;
-ctx.font = 'bold 11px sans-serif';
-ctx.fillText(ef.text, ef.x * TILE + TILE / 2, ef.y * TILE + 4 - (28 - ef.timer) * 0.4);
-ef.timer--;
-if (ef.timer <= 0) effects.splice(i, 1);
-}
-}
-function gameLoop(timestamp) {
-if (player.invuln > 0) player.invuln--;
-if (player.swingTimer > 0) player.swingTimer--;
-if (timestamp - lastBulletMove > 110) {
-stepBullets();
-lastBulletMove = timestamp;
-}
-if (timestamp - lastEnemyMove > 520) {
-stepEnemies();
-lastEnemyMove = timestamp;
-}
-draw();
-requestAnimationFrame(gameLoop);
-}
-// Keyboard Controls
-window.addEventListener('keydown', (e) => {
-const k = e.key.toLowerCase();
-if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) {
-e.preventDefault();
-}
-if (k === 'arrowup' || k === 'w') movePlayer(0, -1);
-else if (k === 'arrowdown' || k === 's') movePlayer(0, 1);
-else if (k === 'arrowleft' || k === 'a') movePlayer(-1, 0);
-else if (k === 'arrowright' || k === 'd') movePlayer(1, 0);
-else if (k === ' ' || k === 'f' || k === 'enter') playerAttack();
-else if (k === 'q') dropPlayerWeapon();
-});
-// On-Screen Button Controls
-document.getElementById('btn-up').addEventListener('click', () => movePlayer(0, -1));
-document.getElementById('btn-down').addEventListener('click', () => movePlayer(0, 1));
-document.getElementById('btn-left').addEventListener('click', () => movePlayer(-1, 0));
-document.getElementById('btn-right').addEventListener('click', () => movePlayer(1, 0));
-document.getElementById('btn-attack').addEventListener('click', playerAttack);
-document.getElementById('btn-drop').addEventListener('click', dropPlayerWeapon);
-document.getElementById('btn-new').addEventListener('click', () => {
-level = 1;
-generateMaze();
-});
-canvas.addEventListener('click', playerAttack);
-generateMaze();
-requestAnimationFrame(gameLoop);
+
+      grid[tile.y][tile.x] = LAVA;
+      const { dist } = bfsDistances(1, 1, true, false);
+      if (dist[exitPos.y][exitPos.x] === Infinity) {
+        grid[tile.y][tile.x] = FLOOR;
+      } else {
+        lavaCount++;
+      }
+    }
+
+    const { dist: safeDist } = bfsDistances(1, 1, true, false);
+    const reachableFloors = [];
+    for (let y = 1; y < ROWS - 1; y++) {
+      for (let x = 1; x < COLS - 1; x++) {
+        if (grid[y][x] === FLOOR && safeDist[y][x] < Infinity && !(x === 1 && y === 1)) {
+          reachableFloors.push({ x, y, d: safeDist[y][x] });
+        }
+      }
+    }
+
+    reachableFloors.sort((a, b) => a.d - b.d);
+    const swordSpot = reachableFloors.find(t => t.d >= 2 && t.d <= 6) || reachableFloors[0];
+    if (swordSpot) {
+      items.push({ id: 1, type: 'sword', x: swordSpot.x, y: swordSpot.y, cooldown: 0 });
+    }
+
+    const gunCandidates = reachableFloors.filter(
+      t => t.d >= 7 && (!swordSpot || (t.x !== swordSpot.x || t.y !== swordSpot.y))
+    );
+    const gunSpot = gunCandidates[Math.floor(gunCandidates.length / 2)] || reachableFloors[reachableFloors.length - 1];
+    if (gunSpot) {
+      items.push({ id: 2, type: 'gun', x: gunSpot.x, y: gunSpot.y, cooldown: 0 });
+    }
+
+    const enemyCount = Math.min(5, 2 + Math.floor(level / 2));
+    const enemySpots = reachableFloors
+      .filter(t => t.d >= 6 && (!swordSpot || t.x !== swordSpot.x || t.y !== swordSpot.y))
+      .sort(() => Math.random() - 0.5);
+
+    for (let i = 0; i < Math.min(enemyCount, enemySpots.length); i++) {
+      enemies.push({
+        id: i + 1,
+        x: enemySpots[i].x,
+        y: enemySpots[i].y,
+        renderX: enemySpots[i].x,
+        renderY: enemySpots[i].y,
+        hp: 1,
+        maxHp: 1,
+        weapon: null,
+        dir: { x: -1, y: 0 },
+        shootCd: 0
+      });
+    }
+
+    updateHUD();
+    setStatus('Find the Sword or Gun and reach the Green Exit!');
+  }
+
+  function addEffect(x, y, text, color = '#fbbf24') {
+    effects.push({ x, y, text, color, timer: 30 });
+  }
+
+  function updateHUD() {
+    uiLives.textContent = player.lives;
+    uiWeapon.textContent = player.weapon === 'sword' ? 'Sword' : player.weapon === 'gun' ? 'Gun' : 'None';
+    uiEnemies.textContent = enemies.length;
+    uiLevel.textContent = level;
+  }
+
+  function spawnDroppedWeapon(type, x, y) {
+    if (!type) return;
+    if (grid[y][x] === LAVA) {
+      addEffect(x, y, 'BURNED!', '#f97316');
+      setStatus(`The ${type} fell into lava and burned up!`, '#f97316');
+      return;
+    }
+    items.push({
+      id: Date.now() + Math.random(),
+      type,
+      x,
+      y,
+      cooldown: 1
+    });
+  }
+
+  function tryPlayerPickup() {
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (it.x === player.x && it.y === player.y) {
+        if (it.cooldown > 0) continue;
+        items.splice(i, 1);
+        const oldWeapon = player.weapon;
+        player.weapon = it.type;
+        if (oldWeapon) {
+          spawnDroppedWeapon(oldWeapon, player.x, player.y);
+          setStatus(`Swapped ${oldWeapon} for ${it.type}!`, '#38bdf8');
+        } else {
+          setStatus(`Picked up the ${it.type.toUpperCase()}!`, '#38bdf8');
+        }
+        addEffect(player.x, player.y, `+${it.type.toUpperCase()}`, '#38bdf8');
+        updateHUD();
+        break;
+      }
+    }
+  }
+
+  function dropPlayerWeapon() {
+    if (!player.weapon || gameOver) return;
+    const dropped = player.weapon;
+    player.weapon = null;
+    spawnDroppedWeapon(dropped, player.x, player.y);
+    if (grid[player.y][player.x] !== LAVA) {
+      setStatus(`Dropped ${dropped} on your tile.`, '#fbbf24');
+    }
+    updateHUD();
+  }
+
+  function damagePlayer(reason) {
+    if (player.invuln > 0 || gameOver) return;
+    player.lives--;
+    player.invuln = 28;
+    addEffect(player.x, player.y, '-1 LIFE', '#ef4444');
+    updateHUD();
+
+    if (player.lives <= 0) {
+      gameOver = true;
+      setStatus(`Game Over (${reason})! Press "New Maze" to play again.`, '#ef4444');
+    } else {
+      player.x = spawnPoint.x;
+      player.y = spawnPoint.y;
+      player.renderX = spawnPoint.x;
+      player.renderY = spawnPoint.y;
+      setStatus(`${reason}! Respawned at checkpoint (${player.lives} lives left).`, '#f87171');
+    }
+  }
+
+  function movePlayer(dx, dy) {
+    if (gameOver) return;
+    player.dir = { x: dx, y: dy };
+
+    for (const it of items) {
+      if (it.cooldown > 0 && (it.x !== player.x || it.y !== player.y)) {
+        it.cooldown = 0;
+      }
+    }
+
+    const nx = player.x + dx;
+    const ny = player.y + dy;
+    if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) return;
+    const tile = grid[ny][nx];
+    if (tile === WALL) return;
+
+    player.x = nx;
+    player.y = ny;
+
+    if (tile === CHECKPOINT) {
+      if (spawnPoint.x !== nx || spawnPoint.y !== ny) {
+        spawnPoint = { x: nx, y: ny };
+        addEffect(nx, ny, 'CHECKPOINT', '#38bdf8');
+        setStatus('Checkpoint saved! Enemies cannot enter this tile.', '#38bdf8');
+      }
+    }
+
+    if (tile === LAVA) {
+      damagePlayer('Stepped in lava');
+      return;
+    }
+
+    if (tile === EXIT) {
+      level++;
+      setStatus(`Level ${level - 1} cleared! Starting Level ${level}...`, '#4ade80');
+      generateMaze();
+      return;
+    }
+
+    tryPlayerPickup();
+
+    const hitEnemy = enemies.find(e => e.x === player.x && e.y === player.y);
+    if (hitEnemy && tile !== CHECKPOINT) {
+      damagePlayer('Hit by an enemy');
+    }
+  }
+
+  function damageEnemy(enemy, amount = 1) {
+    enemy.hp -= amount;
+    if (enemy.hp <= 0) {
+      const idx = enemies.indexOf(enemy);
+      if (idx !== -1) enemies.splice(idx, 1);
+      addEffect(enemy.x, enemy.y, 'DEFEATED!', '#4ade80');
+      if (enemy.weapon) {
+        spawnDroppedWeapon(enemy.weapon, enemy.x, enemy.y);
+      }
+      updateHUD();
+    } else {
+      addEffect(enemy.x, enemy.y, `${enemy.hp} HP LEFT!`, '#fbbf24');
+      setStatus(`Hit armored Sword Enemy! (${enemy.hp} HP remaining)`, '#fbbf24');
+    }
+  }
+
+  function playerAttack() {
+    if (gameOver) return;
+    if (!player.weapon) {
+      setStatus('You have no weapon! Pick up the Sword or Gun first.', '#f87171');
+      return;
+    }
+
+    if (player.weapon === 'sword') {
+      player.swingTimer = 10;
+      const tx = player.x + player.dir.x;
+      const ty = player.y + player.dir.y;
+      addEffect(tx, ty, 'SLASH!', '#e2e8f0');
+
+      const target = enemies.find(e =>
+        (e.x === tx && e.y === ty) || (e.x === player.x && e.y === player.y)
+      );
+      if (target) {
+        damageEnemy(target, 1);
+      }
+    } else if (player.weapon === 'gun') {
+      bullets.push({
+        x: player.x,
+        y: player.y,
+        dx: player.dir.x,
+        dy: player.dir.y,
+        owner: 'player'
+      });
+    }
+  }
+
+  function stepBullets() {
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      const b = bullets[i];
+      b.x += b.dx;
+      b.y += b.dy;
+
+      if (b.x < 0 || b.y < 0 || b.x >= COLS || b.y >= ROWS || grid[b.y][b.x] === WALL) {
+        bullets.splice(i, 1);
+        continue;
+      }
+
+      if (b.owner === 'player') {
+        const hit = enemies.find(e => e.x === b.x && e.y === b.y);
+        if (hit) {
+          bullets.splice(i, 1);
+          damageEnemy(hit, 1);
+        }
+      } else if (b.owner === 'enemy') {
+        if (b.x === player.x && b.y === player.y && grid[player.y][player.x] !== CHECKPOINT) {
+          bullets.splice(i, 1);
+          damagePlayer('Shot by an armed enemy');
+        }
+      }
+    }
+  }
+
+  function stepEnemies() {
+    if (gameOver) return;
+
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const e = enemies[i];
+      if (e.shootCd > 0) e.shootCd--;
+
+      if (e.weapon === 'gun' && e.shootCd === 0 && grid[player.y][player.x] !== CHECKPOINT) {
+        if (e.x === player.x || e.y === player.y) {
+          const dx = Math.sign(player.x - e.x);
+          const dy = Math.sign(player.y - e.y);
+          let cx = e.x + dx;
+          let cy = e.y + dy;
+          let clear = true;
+          while (cx !== player.x || cy !== player.y) {
+            if (grid[cy][cx] === WALL) { clear = false; break; }
+            cx += dx;
+            cy += dy;
+          }
+          if (clear) {
+            e.dir = { x: dx, y: dy };
+            e.shootCd = 4;
+            bullets.push({ x: e.x, y: e.y, dx, dy, owner: 'enemy' });
+            continue;
+          }
+        }
+      }
+
+      let nextStep = null;
+      if (!e.weapon && items.length > 0) {
+        const sortedItems = [...items].sort((a, b) => {
+          if (a.type !== b.type) return a.type === 'gun' ? -1 : 1;
+          return Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y);
+        });
+        for (const it of sortedItems) {
+          if (grid[it.y][it.x] === LAVA || grid[it.y][it.x] === CHECKPOINT) continue;
+          const step = getNextStepToward(e.x, e.y, it.x, it.y);
+          if (step) {
+            nextStep = step;
+            break;
+          }
+        }
+      }
+
+      if (!nextStep && grid[player.y][player.x] !== CHECKPOINT) {
+        nextStep = getNextStepToward(e.x, e.y, player.x, player.y);
+      }
+
+      if (!nextStep) {
+        const shuffled = [...STEP_DIRS].sort(() => Math.random() - 0.5);
+        for (const d of shuffled) {
+          const nx = e.x + d.dx;
+          const ny = e.y + d.dy;
+          if (nx <= 0 || ny <= 0 || nx >= COLS - 1 || ny >= ROWS - 1) continue;
+          const t = grid[ny][nx];
+          if (t === WALL || t === LAVA || t === CHECKPOINT) continue;
+          if (enemies.some(other => other !== e && other.x === nx && other.y === ny)) continue;
+          nextStep = { x: nx, y: ny };
+          break;
+        }
+      }
+
+      if (nextStep) {
+        const t = grid[nextStep.y][nextStep.x];
+        const occupied = enemies.some(other => other !== e && other.x === nextStep.x && other.y === nextStep.y);
+        if (t !== WALL && t !== LAVA && t !== CHECKPOINT && !occupied) {
+          e.dir = { x: nextStep.x - e.x, y: nextStep.y - e.y };
+          e.x = nextStep.x;
+          e.y = nextStep.y;
+        }
+      }
+
+      if (!e.weapon) {
+        const itemIdx = items.findIndex(it => it.x === e.x && it.y === e.y);
+        if (itemIdx !== -1) {
+          const claimed = items.splice(itemIdx, 1)[0];
+          e.weapon = claimed.type;
+          if (claimed.type === 'sword') {
+            e.hp = 2;
+            e.maxHp = 2;
+            addEffect(e.x, e.y, 'SWORD +2 HP!', '#f87171');
+            setStatus('An enemy grabbed the Sword and gained 2 HP!', '#f87171');
+          } else {
+            addEffect(e.x, e.y, 'ARMED!', '#f87171');
+            setStatus('Watch out! An enemy grabbed the Gun!', '#f87171');
+          }
+        }
+      }
+
+      if (e.x === player.x && e.y === player.y && grid[player.y][player.x] !== CHECKPOINT) {
+        damagePlayer(e.weapon === 'sword' ? 'Slashed by a Sword Enemy' : 'Caught by an enemy');
+      }
+    }
+  }
+
+  function drawSwordIcon(cx, cy, scale = 1) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    ctx.rotate(-Math.PI / 4);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(-2, -11, 4, 15);
+    ctx.beginPath();
+    ctx.moveTo(-2, -11);
+    ctx.lineTo(0, -15);
+    ctx.lineTo(2, -11);
+    ctx.fill();
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(-6, 3, 12, 3);
+    ctx.fillStyle = '#92400e';
+    ctx.fillRect(-1.5, 6, 3, 5);
+    ctx.restore();
+  }
+
+  function drawGunIcon(cx, cy, scale = 1) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#facc15';
+    ctx.fillRect(-7, -4, 15, 5);
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(-7, 1, 5, 7);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(5, -3, 3, 3);
+    ctx.restore();
+  }
+
+  function draw() {
+    animTick += 0.06;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Smooth visual interpolation
+    player.renderX += (player.x - player.renderX) * 0.38;
+    player.renderY += (player.y - player.renderY) * 0.38;
+    for (const e of enemies) {
+      e.renderX += (e.x - e.renderX) * 0.25;
+      e.renderY += (e.y - e.renderY) * 0.25;
+    }
+
+    // 1. Draw Tiles
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const px = x * TILE;
+        const py = y * TILE;
+        const t = grid[y][x];
+
+        if (t === WALL) {
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(px + 1, py + 1, TILE - 2, 4);
+          ctx.strokeStyle = '#1e293b';
+          ctx.strokeRect(px, py, TILE, TILE);
+        } else if (t === LAVA) {
+          ctx.fillStyle = '#dc2626';
+          ctx.fillRect(px, py, TILE, TILE);
+          const pulse = 0.5 + 0.5 * Math.sin(animTick * 2 + x + y);
+          ctx.fillStyle = `rgba(250, 204, 21, ${0.45 + pulse * 0.45})`;
+          ctx.fillRect(px + 3, py + 3, TILE - 6, TILE - 6);
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath();
+          ctx.arc(px + TILE * 0.35, py + TILE * 0.4, 2.5, 0, Math.PI * 2);
+          ctx.arc(px + TILE * 0.68, py + TILE * 0.65, 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (t === CHECKPOINT) {
+          ctx.fillStyle = '#075985';
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(px + 2, py + 2, TILE - 4, TILE - 4);
+          ctx.lineWidth = 1;
+          // Flagpole & flag
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(px + 9, py + 6, 2, 18);
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.moveTo(px + 11, py + 6);
+          ctx.lineTo(px + 22, py + 10);
+          ctx.lineTo(px + 11, py + 14);
+          ctx.fill();
+        } else if (t === EXIT) {
+          ctx.fillStyle = '#15803d';
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.strokeStyle = '#4ade80';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(px + 2, py + 2, TILE - 4, TILE - 4);
+          ctx.lineWidth = 1;
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('EXIT', px + TILE / 2, py + TILE / 2);
+        } else {
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.strokeStyle = '#1e293b';
+          ctx.strokeRect(px, py, TILE, TILE);
+        }
+      }
+    }
+
+    // 2. Draw Items
+    for (const it of items) {
+      const cx = it.x * TILE + TILE / 2;
+      const cy = it.y * TILE + TILE / 2 + Math.sin(animTick * 2 + it.id) * 2;
+      ctx.fillStyle = it.type === 'sword' ? 'rgba(148, 163, 184, 0.25)' : 'rgba(250, 204, 21, 0.25)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, TILE * 0.42, 0, Math.PI * 2);
+      ctx.fill();
+      if (it.type === 'sword') drawSwordIcon(cx, cy, 1.05);
+      else drawGunIcon(cx, cy, 1.05);
+    }
+
+    // 3. Draw Enemies
+    for (const e of enemies) {
+      const cx = e.renderX * TILE + TILE / 2;
+      const cy = e.renderY * TILE + TILE / 2;
+
+      ctx.fillStyle = e.weapon === 'sword' ? '#9333ea' : e.weapon === 'gun' ? '#dc2626' : '#f43f5e';
+      ctx.beginPath();
+      ctx.arc(cx, cy, TILE * 0.37, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(cx - 5, cy - 4, 3, 3);
+      ctx.fillRect(cx + 2, cy - 4, 3, 3);
+
+      if (e.weapon === 'sword') drawSwordIcon(cx + 9, cy - 6, 0.65);
+      else if (e.weapon === 'gun') drawGunIcon(cx + 9, cy - 6, 0.65);
+
+      if (e.maxHp > 1) {
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${e.hp}HP`, cx, cy + 13);
+      }
+    }
+
+    // 4. Draw Player
+    const pcx = player.renderX * TILE + TILE / 2;
+    const pcy = player.renderY * TILE + TILE / 2;
+    if (player.invuln === 0 || Math.floor(player.invuln / 3) % 2 === 0) {
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(pcx, pcy, TILE * 0.37, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(pcx + player.dir.x * 6, pcy + player.dir.y * 6, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (player.weapon === 'sword') drawSwordIcon(pcx + 10, pcy - 7, 0.7);
+      else if (player.weapon === 'gun') drawGunIcon(pcx + 10, pcy - 7, 0.7);
+    }
+
+    if (player.swingTimer > 0) {
+      const sx = (player.x + player.dir.x) * TILE + TILE / 2;
+      const sy = (player.y + player.dir.y) * TILE + TILE / 2;
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(sx, sy, TILE * 0.36, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
+
+    // 5. Draw Bullets
+    for (const b of bullets) {
+      ctx.fillStyle = b.owner === 'player' ? '#facc15' : '#fb7185';
+      ctx.beginPath();
+      ctx.arc(b.x * TILE + TILE / 2, b.y * TILE + TILE / 2, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 6. Draw Floating Effects
+    ctx.textAlign = 'center';
+    for (let i = effects.length - 1; i >= 0; i--) {
+      const ef = effects[i];
+      ctx.fillStyle = ef.color;
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText(ef.text, ef.x * TILE + TILE / 2, ef.y * TILE + 4 - (30 - ef.timer) * 0.45);
+      ef.timer--;
+      if (ef.timer <= 0) effects.splice(i, 1);
+    }
+  }
+
+  function gameLoop(timestamp) {
+    if (player.invuln > 0) player.invuln--;
+    if (player.swingTimer > 0) player.swingTimer--;
+
+    if (timestamp - lastBulletMove > 105) {
+      stepBullets();
+      lastBulletMove = timestamp;
+    }
+
+    if (timestamp - lastEnemyMove > 520) {
+      stepEnemies();
+      lastEnemyMove = timestamp;
+    }
+
+    draw();
+    requestAnimationFrame(gameLoop);
+  }
+
+  window.addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) {
+      e.preventDefault();
+    }
+    if (k === 'arrowup' || k === 'w') movePlayer(0, -1);
+    else if (k === 'arrowdown' || k === 's') movePlayer(0, 1);
+    else if (k === 'arrowleft' || k === 'a') movePlayer(-1, 0);
+    else if (k === 'arrowright' || k === 'd') movePlayer(1, 0);
+    else if (k === ' ' || k === 'f' || k === 'enter') playerAttack();
+    else if (k === 'q') dropPlayerWeapon();
+  });
+
+  document.getElementById('btn-up').addEventListener('click', () => movePlayer(0, -1));
+  document.getElementById('btn-down').addEventListener('click', () => movePlayer(0, 1));
+  document.getElementById('btn-left').addEventListener('click', () => movePlayer(-1, 0));
+  document.getElementById('btn-right').addEventListener('click', () => movePlayer(1, 0));
+  document.getElementById('btn-attack').addEventListener('click', playerAttack);
+  document.getElementById('btn-drop').addEventListener('click', dropPlayerWeapon);
+  document.getElementById('btn-new').addEventListener('click', () => {
+    level = 1;
+    generateMaze();
+  });
+  canvas.addEventListener('click', playerAttack);
+
+  generateMaze();
+  requestAnimationFrame(gameLoop);
 })();
 </script>
+</body>
+</html>
